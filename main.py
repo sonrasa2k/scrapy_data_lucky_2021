@@ -1,16 +1,41 @@
-# This is a sample Python script.
+import cv2 as cv
+import numpy as np
+import os
+from app import app
+from collections import Counter
+import urllib.request
+from flask import Flask, flash, request, redirect, url_for, render_template
+from werkzeug.utils import secure_filename
+import  base64
+import pandas as pd
+day_in_data = []
+moth_in_data = []
+rank_in_data = []
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+def get_data(path_csv):
+    global day_in_data
+    global moth_in_data
+    global rank_in_data
+    data = pd.read_csv(path_csv)
+    day_in_data = data[['day']].values
+    moth_in_data = data[['month']].values
+    rank_in_data = data[['rank']].values
+    print(rank_in_data[0])
+
+@app.route('/')
+def upload_form():
+    return render_template('index.html')
+@app.route('/lucky',methods=['POST'])
+def get_date():
+    day = request.form.get('date')
+    month = request.form.get('month')
+    get_data("lucky.csv")
+    rank_final = ""
+    for i in range(len(day_in_data)):
+        if int(day) == int(day_in_data[i]) and int(month) == int(moth_in_data[i]):
+            rank_final = int(rank_in_data[i])
+    return render_template('index.html',rank = rank_final)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    app.run()
